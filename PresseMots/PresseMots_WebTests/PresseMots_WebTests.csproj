@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PresseMots_DataAccess\PresseMots_DataAccess.csproj" />
     <ProjectReference Include="..\PresseMots_Web\PresseMots_Web.csproj" />
   </ItemGroup>
 
