@@ -53,7 +53,7 @@ namespace PresseMots_Web.Models
         {
             var model = validationContext.ObjectInstance as AddUserViewModel;
             var locals = validationContext.GetService(typeof(IStringLocalizer<AddUserViewModel>)) as IStringLocalizer;
-            var result = Zxcvbn.Core.EvaluatePassword(model.Password);
+            var result = Zxcvbn.Core.EvaluatePassword(model.Password ?? "x");
             if (result.Score < 3)
             {
                 yield return new ValidationResult(locals["Passwords are not strong enough."], new[] { nameof(Password) });
