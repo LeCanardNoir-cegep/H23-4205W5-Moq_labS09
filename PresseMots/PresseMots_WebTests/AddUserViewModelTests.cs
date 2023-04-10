@@ -21,28 +21,55 @@ namespace PresseMots_WebTests
         public List<ValidationResult> ValidateEntity(object entity, string property)
         {
             /** ARRANGE */
-            // Mock le provider de traduction du ViewModel AddUserViewModel.
+
+            /** 
+             *  Mock du service de traduction de AddUserViewModel
+             *  
+             *  RÉFÉRENCE: 
+             *  PresseMots_Web.Models.AddUserViewModel.Validate(...) ligne 55 
+            */
             var mockLocals = new Mock<IStringLocalizer<AddUserViewModel>>();
             var errorMessage = "Passwords are not strong enough.";
             mockLocals.Setup( _ => _[errorMessage]).Returns( new LocalizedString(errorMessage, errorMessage) );
 
-            // Mock le provider service
-            // Injection de dépendance de la traduction
-            var mockServices = new Mock<IServiceProvider>();
-            mockServices.Setup(s => s.GetService(typeof(IStringLocalizer<AddUserViewModel>))).Returns(mockLocals.Object);
+            /** 
+             *  Mock du ServiceProvider nécessaire à l'interface IValidatableObject
+             *  
+             *  RÉFÉRENCE: 
+             *  PresseMots_Web.Models.AddUserViewModel.Validate(...) ligne 55
+            */
+            var mockServiceProvider = new Mock<IServiceProvider>();
+            mockServiceProvider.Setup(s => s.GetService(typeof(IStringLocalizer<AddUserViewModel>))).Returns(mockLocals.Object);
 
-            // Création du context de validation
-            // On a besoin de l'entité à valider et des mockServices requis.
-            // Ici nous avons besoin du service de traduction inclu dans les ServicesProvider
-            var validationContext = new ValidationContext(entity, mockServices.Object, null);
+
+
+            /** 
+             *  Tester les validations des modèles.
+             *  Création du context de validation
+             *  On a besoin de l'entité à valider et des mockServiceProvider requis.
+             *  Ici nous avons besoin des IStringLocalizer et IServiceBase dans le ServicesProvider 
+             *  
+             *  RÉFÉRENCE:
+             *  v. PDF S09_Moq.pdf p. 15
+            */
+            var validationContext = new ValidationContext(entity, mockServiceProvider.Object, null);
             var results = new List<ValidationResult>();
 
             /** ACT */
             // Valider toutes les propriétés de l'entité
-            Validator.TryValidateObject(entity, validationContext, results, validateAllProperties: true);
+            Validator.TryValidateObject(
+                instance: entity,
+                validationContext: validationContext,
+                validationResults: results,
+                validateAllProperties: true
+                );
 
             // Valider le IValidatableObject. Au fond valider la validation ????
-            Validator.TryValidateObject(entity, validationContext, results); 
+            Validator.TryValidateObject(
+                instance: entity,
+                validationContext: validationContext,
+                validationResults: results
+                );
 
             return results.Where(x => x.MemberNames.Any(y => property == null || y == property)).ToList();
 
